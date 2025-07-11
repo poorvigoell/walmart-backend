@@ -1,4 +1,5 @@
 import pandas as pd
+import gdown
 import numpy as np
 import requests
 import lightgbm as lgb
@@ -38,14 +39,30 @@ def create_lag_features(df, lags=[7, 28], windows=[7, 28]):
                 df.groupby('id')[f'lag_{lag}'].transform(lambda x: x.rolling(win).mean())
             )
 
+def load_data():
+    sales_id = "1W6aJIYVrdUo_n39pcFwqUphPV6gnOMKo"
+    calendar_id = "1t0fbfL9ukoA6ZlcF2B6hEoi5mZgDP9Ag"
+    prices_id = "1ZXg52jNdQM_zNgM7B9EqeN2T6SHfH4T6"
+
+    os.makedirs("data", exist_ok=True)
+
+    gdown.download(f"https://drive.google.com/uc?id={calendar_id}", "data/calendar.csv", quiet=False)
+    gdown.download(f"https://drive.google.com/uc?id={sales_id}", "data/sales.csv", quiet=False)
+    gdown.download(f"https://drive.google.com/uc?id={prices_id}", "data/sell_prices.csv", quiet=False)
+
+    calendar = pd.read_csv("data/calendar.csv")
+    sales = pd.read_csv("data/sales.csv")
+    sell_prices = pd.read_csv("data/sell_prices.csv")
+
+    return calendar, sales, sell_prices
+
 def run_lazy_forecast(city='Austin'):
     # Weather check
     weather_trigger = get_weather_trigger(city)
 
     # Load data
-    calendar = pd.read_csv("https://drive.google.com/uc?export=download&id=1t0fbfL9ukoA6ZlcF2B6hEoi5mZgDP9Ag")
-    sales = pd.read_csv("https://drive.google.com/uc?export=download&id=1W6aJIYVrdUo_n39pcFwqUphPV6gnOMKo")
-    sell_prices = pd.read_csv("https://drive.google.com/uc?export=download&id=1ZXg52jNdQM_zNgM7B9EqeN2T6SHfH4T6")
+    calendar, sales, sell_prices = load_data()
+
     sales = sales.iloc[:, :6].join(sales.iloc[:, -60:])
 
     # Melt and merge
@@ -162,9 +179,9 @@ def run_lazy_forecast(city='Austin'):
 def get_stockout_alerts(city='Austin'):
     # Repeat shared setup steps
     weather_trigger = get_weather_trigger(city)
-    calendar = pd.read_csv('./data/calendar.csv')
-    sell_prices = pd.read_csv('./data/sell_prices.csv')
-    sales = pd.read_csv('./data/sales_train_validation.csv')
+    
+    calendar, sales, sell_prices = load_data()
+
     sales = sales.iloc[:, :6].join(sales.iloc[:, -60:])
     forecast_days = [f'd_{i}' for i in range(1914, 1942)]
 
