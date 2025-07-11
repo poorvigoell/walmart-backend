@@ -43,9 +43,9 @@ def run_lazy_forecast(city='Austin'):
     weather_trigger = get_weather_trigger(city)
 
     # Load data
-    calendar = pd.read_csv('./data/calendar.csv')
-    sell_prices = pd.read_csv('./data/sell_prices.csv')
-    sales = pd.read_csv('./data/sales_train_validation.csv')
+    calendar = pd.read_csv("https://drive.google.com/uc?export=download&id=1t0fbfL9ukoA6ZlcF2B6hEoi5mZgDP9Ag")
+    sales = pd.read_csv("https://drive.google.com/uc?export=download&id=1W6aJIYVrdUo_n39pcFwqUphPV6gnOMKo")
+    sell_prices = pd.read_csv("https://drive.google.com/uc?export=download&id=1ZXg52jNdQM_zNgM7B9EqeN2T6SHfH4T6")
     sales = sales.iloc[:, :6].join(sales.iloc[:, -60:])
 
     # Melt and merge
