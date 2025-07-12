@@ -9,7 +9,6 @@ import os
 load_dotenv()
 api_key = os.getenv("WEATHER_API_KEY")
 
-
 def get_weather_trigger(city='Austin'):
     api_key = "30cde49b96cbba46887872e0e9bcf81b"
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}"
@@ -39,7 +38,13 @@ def create_lag_features(df, lags=[7, 28], windows=[7, 28]):
                 df.groupby('id')[f'lag_{lag}'].transform(lambda x: x.rolling(win).mean())
             )
 
+calendar_global = None
+sales_global = None
+sell_prices_global = None
+
 def load_data():
+    global calendar_global, sales_global, sell_prices_global
+
     sales_id = "1W6aJIYVrdUo_n39pcFwqUphPV6gnOMKo"
     calendar_id = "1t0fbfL9ukoA6ZlcF2B6hEoi5mZgDP9Ag"
     prices_id = "1ZXg52jNdQM_zNgM7B9EqeN2T6SHfH4T6"
@@ -50,18 +55,17 @@ def load_data():
     gdown.download(f"https://drive.google.com/uc?id={sales_id}", "data/sales.csv", quiet=False)
     gdown.download(f"https://drive.google.com/uc?id={prices_id}", "data/sell_prices.csv", quiet=False)
 
-    calendar = pd.read_csv("data/calendar.csv")
-    sales = pd.read_csv("data/sales.csv")
-    sell_prices = pd.read_csv("data/sell_prices.csv")
-
-    return calendar, sales, sell_prices
+    calendar_global = pd.read_csv("data/calendar.csv")
+    sales_global = pd.read_csv("data/sales.csv")
+    sell_prices_global = pd.read_csv("data/sell_prices.csv")
 
 def run_lazy_forecast(city='Austin'):
     # Weather check
     weather_trigger = get_weather_trigger(city)
 
     # Load data
-    calendar, sales, sell_prices = load_data()
+    global calendar_global, sales_global, sell_prices_global
+    calendar, sales, sell_prices = calendar_global, sales_global, sell_prices_global
 
     sales = sales.iloc[:, :6].join(sales.iloc[:, -60:])
 
@@ -180,7 +184,8 @@ def get_stockout_alerts(city='Austin'):
     # Repeat shared setup steps
     weather_trigger = get_weather_trigger(city)
     
-    calendar, sales, sell_prices = load_data()
+    global calendar_global, sales_global, sell_prices_global
+    calendar, sales, sell_prices = calendar_global, sales_global, sell_prices_global
 
     sales = sales.iloc[:, :6].join(sales.iloc[:, -60:])
     forecast_days = [f'd_{i}' for i in range(1914, 1942)]
