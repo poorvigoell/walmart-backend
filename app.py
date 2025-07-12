@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from lazyforecast import run_lazy_forecast, get_stockout_alerts
+from lazyforecast import run_lazy_forecast, get_stockout_alerts, load_data
 
 app = FastAPI(title="Lazy AI Forecast API")
 
@@ -15,6 +15,10 @@ app.add_middleware(
 @app.get("/")
 def home():
     return {"status": "✅ Lazy AI model is running"}
+
+@app.on_event("startup")
+def load_all_data_once():
+    load_data()
 
 @app.get("/stockout-alerts")
 def stock_alerts():
