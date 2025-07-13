@@ -67,7 +67,7 @@ def run_lazy_forecast(city='Austin'):
     global calendar_global, sales_global, sell_prices_global
     calendar, sales, sell_prices = calendar_global, sales_global, sell_prices_global
 
-    sales = sales.iloc[:, :6].join(sales.iloc[:, -60:])
+    sales = sales.iloc[:, :6].join(sales.iloc[:, -45:])
 
     # Melt and merge
     sales_melted = sales.melt(
@@ -187,7 +187,7 @@ def get_stockout_alerts(city='Austin'):
     global calendar_global, sales_global, sell_prices_global
     calendar, sales, sell_prices = calendar_global, sales_global, sell_prices_global
 
-    sales = sales.iloc[:, :6].join(sales.iloc[:, -60:])
+    sales = sales.iloc[:, :6].join(sales.iloc[:, -45:])
     forecast_days = [f'd_{i}' for i in range(1914, 1942)]
 
     # Prepare recent sales
